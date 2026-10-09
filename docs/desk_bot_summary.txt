@@ -1,0 +1,182 @@
+=====================================================================
+DESK BOT PROJECT - SUMMARY OF EVERYTHING SO FAR
+(ESP32 + OLED mini desk robot companion)
+=====================================================================
+
+1. THE IDEA
+---------------------------------------------------------------------
+A mini desk robot companion that sits on your desk while you work.
+It should not just sit there: it should be genuinely helpful, act as a
+productive companion, send small inspirations like a toy with
+personality, and be something you can talk to when you feel the need
+to connect with something. Inspiration came from desk bots like Eilik
+and EMO (expressive face + small movements + personality).
+
+
+2. HARDWARE PROFILE
+---------------------------------------------------------------------
+ESP32
+  - Board: ESP32 Dev Module
+  - Chip: ESP32-D0WD-V3, revision v3.0
+  - CPU: dual core, 240 MHz
+  - Connectivity: Wi-Fi + Bluetooth
+  - Serial port: /dev/ttyUSB0
+  - Flash mode: DIO
+  - I2C: SDA = GPIO 21, SCL = GPIO 22
+
+OLED
+  - 0.96-inch, I2C, 128 x 64, address 0x3C
+  - Pins: GND, VCC, SCL, SDA
+  - Library in use: Adafruit SSD1306 + Adafruit GFX
+  - Reset pin: none (-1)
+
+Other items mentioned earlier: jumper wires, breadboard, servo motors,
+resistors.
+
+CURRENT DECISION: Phase 1 uses ONLY the ESP32 and the OLED. No buzzer,
+no touch input, no other parts.
+
+
+3. FEATURE BRAINSTORM (what the bot could do)
+---------------------------------------------------------------------
+Focus companion
+  - Pomodoro timer; face changes with state (locked-in while working,
+    sleepy at break, celebrating when a session ends)
+Wellbeing nudges
+  - Water, posture, and the 20-20-20 eye-break rule
+Task and deadline buddy
+  - Shows your top 1-3 tasks, nudges you when one is slipping
+Mood check-in
+  - Quick check-in once or twice a day; bot reacts; data logged so you
+    can see focus/mood trends later
+Inspiration
+  - Daily messages and "you've got this" pushes, ideally LLM-written
+    so they are not repetitive
+Ambient info
+  - Clock (NTP over Wi-Fi), weather (stretch)
+LLM personality
+  - Chat with the bot; it knows your todos, timer state and time of day
+Life-like behaviors
+  - Idle blinking, looking around, head tilts with a servo, sleeping
+    when the room is dark (needs a light sensor, stretch)
+
+
+4. DECISIONS MADE
+---------------------------------------------------------------------
+- Phone is the only input device. Everything (todos, timers, chat) is
+  controlled from a website opened on the phone.
+- The ESP32 shows todos, timers and the face on the OLED.
+- LLM chat is included in the plan.
+- Output side will eventually need a speaker (spoken replies need
+  backend text-to-speech streamed over Wi-Fi; ESP32 cannot do good
+  speech by itself).
+- Home-only for now: runs on the local home Wi-Fi, scale up later.
+- Build v1 first, buy extra parts later.
+- Architecture: small FastAPI backend on the laptop at home; phone and
+  ESP32 both talk to it. LLM API key stays on the laptop, never on the
+  ESP32. Give the laptop a fixed local IP (DHCP reservation) so the
+  ESP32 always finds it. Timers and todos are also cached on the ESP32
+  so it still works when the laptop sleeps. Moving to the cloud later
+  is mostly a one-URL change.
+
+
+5. PHASE PLAN
+---------------------------------------------------------------------
+Phase 1 - The living face (ESP32 + OLED only, no Wi-Fi)
+  Eye animations (blink, look around, happy, sleepy, surprised, angry,
+  focused, sad), expression state machine, random idle behavior.
+  Done when: the bot has a personality on your desk.
+
+Phase 2 - Connected brain and todos
+  ESP32 joins Wi-Fi; FastAPI backend on laptop; phone web page for
+  todos and timers; OLED shows current task, clock and Pomodoro
+  countdown; face reacts to state; local caching on the ESP32.
+  Done when: you can run a full focus session from your phone.
+
+Phase 3 - Helpful companion
+  Wellbeing nudges, daily inspiration, mood check-in (via phone) and
+  logging. With no buzzer or touch available, alerts are visual on the
+  OLED and all input comes from the phone.
+
+Phase 4 - LLM personality
+  Chat from the phone with short replies on the OLED, context-aware
+  (todos, timer, time of day), short conversation memory, a defined
+  personality in the system prompt.
+
+Phase 5 - Body and voice (later, needs purchases)
+  1-2 servos for head turn/tilt, speaker + I2S amp (e.g. MAX98357A) for
+  sounds and spoken replies, mic only if voice input is still wanted.
+
+Stretch ideas: weather, light sensor sleep mode, calendar/deadline
+sync, stats dashboard, 3D-printed or cardboard shell.
+
+v1 SCOPE = Phases 1 to 3. Phase 4 is the "wow" factor, Phase 5 is
+polish.
+
+
+6. PHASE 1 DETAILS
+---------------------------------------------------------------------
+Wiring (all that is needed):
+    OLED VCC -> ESP32 3V3
+    OLED GND -> ESP32 GND
+    OLED SDA -> ESP32 GPIO 21
+    OLED SCL -> ESP32 GPIO 22
+
+Changing moods without extra parts:
+  - Auto-cycles through moods every 6 seconds (default)
+  - Serial Monitor at 115200 baud: type 1-7 to choose a mood
+    (1 IDLE, 2 HAPPY, 3 SLEEPY, 4 FOCUSED, 5 SURPRISED, 6 ANGRY,
+    7 SAD), type 'a' to go back to auto-cycle
+  - BOOT button on the ESP32 board (built in, optional): next mood
+
+Code structure:
+  1. Eyes as data: each expression is a set of numbers (width, height,
+     corner radius, top-lid cover, lid slant, cheek). Drawn with rounded
+     rectangles, black triangles for lids, and a black circle for the
+     happy cheek.
+  2. Tweening: current values move a fraction toward target values each
+     frame, so changes look smooth and alive.
+  3. No delay(): millis() timers drive the ~25 fps frame update, random
+     blinks every 2-6 s, and random look-around every 1.2-3.5 s.
+  4. Expression state machine with 7 moods.
+  5. Wire.setClock(400000) after display.begin() for faster I2C.
+
+First milestone: blinking eyes, look-around, and mood changes (auto,
+serial or BOOT button). When it runs, share a short video/photo and any
+serial output so proportions and timing can be tuned together.
+
+
+7. FILES PRODUCED
+---------------------------------------------------------------------
+- desk_bot_phase1/desk_bot_phase1.ino : Phase 1 Arduino sketch
+- wokwi/diagram.json, wokwi/libraries.txt : simulator project files
+- desk_bot_phase1.xlsx : wiring, code structure and milestone checklist
+- desk_bot_summary.txt : this file
+
+
+8. TRYING IT WITHOUT HARDWARE (WOKWI SIMULATOR)
+---------------------------------------------------------------------
+Wokwi (wokwi.com) is a free browser simulator that supports an ESP32
+and an SSD1306 OLED.
+  1. Go to wokwi.com and start a new ESP32 project.
+  2. Replace sketch.ino with the contents of desk_bot_phase1.ino.
+  3. Replace diagram.json with wokwi/diagram.json.
+  4. Add the two lines from wokwi/libraries.txt to libraries.txt.
+  5. Press the green Start button. The eyes should appear on the OLED.
+     Type 1-7 in the serial monitor to switch moods.
+Note: simulator timing and wiring may need small tweaks, and the real
+hardware is still the final check.
+
+
+9. NEXT STEPS
+---------------------------------------------------------------------
+- Run the sketch in Wokwi and/or flash it to the real ESP32.
+- Share a video/photo and serial output; tune eye sizes, blink timing
+  and expressions.
+- Then move on to Phase 2 (Wi-Fi, FastAPI backend, phone todo page).
+
+
+
+--------------------------------------------------------------------
+Laptop's IP - 192.168.0.110 172.18.0.1 172.19.0.1 172.17.0.1 
+
