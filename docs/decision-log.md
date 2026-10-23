@@ -15,3 +15,6 @@ One line per decision: date, choice, reason.
 Open (defaults in the report, section 16): confirmation rule, Grok access, wake word licence,
 USB path and projects, Xfce commands, access token, voice control of to-dos and timer,
 activity log storage, Python version.
+
+- 2026-10-23: Confirmation rule = either voice or website approves (confirm_mode = "either").
+- 2026-10-23: Voice control of to-dos and timer is in scope.
