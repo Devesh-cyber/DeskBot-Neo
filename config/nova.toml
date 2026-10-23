@@ -1,0 +1,72 @@
+# Nova main configuration. Safe to commit: NO secrets here (keys go in .env).
+# Every value marked CONFIRM is a default that you should check on your machine.
+
+[server]
+host = "0.0.0.0"
+port = 8000
+
+[device]
+# ESP32 address: a fixed IP reserved in the router, or an mDNS name.
+# CONFIRM: 192.168.0.108 is the address your ESP32 got earlier; reserve it in the router.
+address = "192.168.0.108"
+port = 80
+heartbeat_s = 5
+disconnect_after_s = 15
+
+[folders]
+# Nova may only touch paths whose real location is inside one of these.
+allowed = ["~/Downloads", "~/Documents", "~/Desktop"]
+
+[usb]
+# CONFIRM: mount path of the pen drive that holds your projects.
+# Run scripts/check_env.py to see candidates (usually /media/<user>/<label>).
+mount_path = "/media/devesh/DEVESH PD"
+required_for_projects = true
+
+# Apps Nova may open: name -> command (no shell is ever used).
+# CONFIRM each command exists on your Xfce setup (scripts/check_env.py checks them).
+[apps.browser]
+command = ["firefox"]
+
+[apps.file_manager]
+command = ["thunar"]
+
+[apps.vscode]
+command = ["code"]
+
+[apps.text_editor]
+command = ["xed"]
+
+[llm]
+provider = "xai"
+base_url = "https://api.x.ai/v1"
+# CONFIRM: leave empty, run `python scripts/check_llm.py` to list models, then fill one in.
+model = ""
+api_key_env = "XAI_API_KEY"
+timeout_s = 30
+
+[voice]
+assistant_name = "Nova"
+wake_phrase = "Hey Nova"
+wake_engine = "porcupine"
+picovoice_key_env = "PICOVOICE_ACCESS_KEY"
+stt_engine = "faster-whisper"
+stt_model = "tiny.en"
+tts_engine = "piper"
+mute_mic_while_speaking = true
+
+[safety]
+max_steps = 5
+tool_timeout_s = 60
+output_limit_chars = 4000
+# Open decision 1: "either" = voice or website can approve, "both" = both must approve.
+confirm_mode = "either"
+access_token_env = "NOVA_TOKEN"
+
+[conversation]
+max_turns = 8
+idle_reset_minutes = 10
+
+[logging]
+level = "INFO"
+activity_db = "data/activity.db"

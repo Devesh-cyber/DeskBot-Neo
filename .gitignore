@@ -1,2 +1,11 @@
 firmware/phase2_connected/secrets.h
 pycache/**/*
+# --- Nova additions (append to your existing .gitignore) ---
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+server/data.json
+firmware/**/secrets.h

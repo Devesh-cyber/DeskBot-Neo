@@ -1,0 +1,11 @@
+# Projects Nova may work with (the project registry).
+# The LLM only ever names a project; the command below is the only thing that runs.
+# The path must be inside an allowed folder or on the USB drive.
+#
+# Uncomment and edit one entry per project:
+#
+# [[projects]]
+# name = "desk bot"
+# path = "/media/YOUR_USER/YOUR_USB/projects/desk_bot"
+# test_command = ["python3", "-m", "pytest", "-q"]
+# timeout_s = 120
