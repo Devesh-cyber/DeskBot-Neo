@@ -9,3 +9,9 @@
 # path = "/media/YOUR_USER/YOUR_USB/projects/desk_bot"
 # test_command = ["python3", "-m", "pytest", "-q"]
 # timeout_s = 120
+
+[[projects]]
+name = "DeskBot"
+path = "/home/devesh/Documents/DesktopBot"
+test_command = ["/home/devesh/Documents/DesktopBot/.venv/bin/python", "-m", "pytest", "-q"]
+timeout_s = 120

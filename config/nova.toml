@@ -38,17 +38,17 @@ command = ["code"]
 command = ["xed"]
 
 [llm]
-provider = "xai"
-base_url = "https://api.x.ai/v1"
+provider = "groq"
+base_url = "https://api.groq.com/openai/v1"
 # CONFIRM: leave empty, run `python scripts/check_llm.py` to list models, then fill one in.
-model = ""
-api_key_env = "XAI_API_KEY"
+model = "openai/gpt-oss-120b"
+api_key_env = "GROQ_API_KEY"
 timeout_s = 30
 
 [voice]
 assistant_name = "Nova"
 wake_phrase = "Hey Nova"
-wake_engine = "porcupine"
+wake_engine = "openwakeword"
 picovoice_key_env = "PICOVOICE_ACCESS_KEY"
 stt_engine = "faster-whisper"
 stt_model = "tiny.en"

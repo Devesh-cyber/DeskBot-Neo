@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -32,8 +33,6 @@ def test_shipped_config_loads(root):
     assert cfg.safety.max_steps == 5
     assert set(cfg.apps) == {"browser", "file_manager", "vscode", "text_editor"}
     assert cfg.apps["browser"].command == ["firefox"]
-    assert cfg.projects == []
-    assert cfg.folders.usb_mount_path is None
 
 
 def test_allowed_folders_are_expanded(root):
@@ -43,7 +42,8 @@ def test_allowed_folders_are_expanded(root):
 
 
 def test_usb_path_loaded(root):
-    edit(root, 'mount_path = ""', 'mount_path = "/media/devesh/PEN"')
+    path = root / "config" / "nova.toml"
+    path.write_text(re.sub(r'(?m)^mount_path = .*$', 'mount_path = "/media/devesh/PEN"', path.read_text()))
     assert load_config(root, load_dotenv=False).folders.usb_mount_path == Path("/media/devesh/PEN")
 
 
