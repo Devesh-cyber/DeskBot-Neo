@@ -18,3 +18,9 @@ activity log storage, Python version.
 
 - 2026-10-23: Confirmation rule = either voice or website approves (confirm_mode = "either").
 - 2026-10-23: Voice control of to-dos and timer is in scope.
+
+- 2026-10-23: Phase 1 done in code. Display commands go to POST /display on the ESP32 with a bearer token (DEVICE_TOKEN = NOVA_TOKEN).
+- 2026-10-23: Pushed states expire by themselves (time-to-live) so a crashed laptop never leaves the face stuck.
+- 2026-10-23: Disconnected = 15 s without any contact (to-do poll, heartbeat or push). The local timer keeps running.
+- 2026-10-23: ESP32 gets a fixed IP in firmware (192.168.0.201) because the router reservation was not available.
+- 2026-10-23: Wake word engine changed from Picovoice (free tier ended 2026-06-30) to openWakeWord. LLM provider changed from xAI to Groq (openai/gpt-oss-120b).

@@ -8,7 +8,7 @@ port = 8000
 [device]
 # ESP32 address: a fixed IP reserved in the router, or an mDNS name.
 # CONFIRM: 192.168.0.108 is the address your ESP32 got earlier; reserve it in the router.
-address = "192.168.0.108"
+address = "192.168.0.201"
 port = 80
 heartbeat_s = 5
 disconnect_after_s = 15

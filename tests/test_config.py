@@ -58,7 +58,8 @@ def test_missing_section_gives_clear_error(root):
 
 
 def test_missing_required_key(root):
-    edit(root, 'address = "192.168.0.108"\n', "")
+    path = root / "config" / "nova.toml"
+    path.write_text(re.sub(r'(?m)^address = .*\n', '', path.read_text()))
     with pytest.raises(ConfigError, match="address is missing"):
         load_config(root, load_dotenv=False)
 

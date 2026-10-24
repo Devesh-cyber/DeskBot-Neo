@@ -24,9 +24,22 @@ Errors: JSON `{error: <code>, message: <text>}` with a matching HTTP status.
 
 ## ESP32 (port 80)
 
-- `POST /display` body `{state, text?, step?, steps?, ttl_ms?}`
-  - `state`: idle, listening, thinking, speaking, working, saved, error, disconnected
-  - `text`: plain ASCII, up to 40 characters
-  - `ttl_ms`: return to idle after this time (optional)
-- `GET /health` -> `{ok: true, uptime_s, state}`
-- The laptop sends a heartbeat every 5 s. No heartbeat for 15 s -> disconnected.
+Auth: `Authorization: Bearer <DEVICE_TOKEN>` where `DEVICE_TOKEN` (in `secrets.h`) equals `NOVA_TOKEN` (in `.env`).
+Missing or wrong token -> HTTP 401. Errors are JSON `{error, message}`.
+
+- `POST /display` (token) body `{state, text?, ttl_ms?, step?, steps?}` -> `{ok: true, state}`
+  - `state`: idle, listening, thinking, speaking, working, saved, error, disconnected (case-insensitive)
+  - `text`: up to 40 characters, printable ASCII (anything else becomes `?`). Shown by working, error, saved.
+  - `ttl_ms`: how long the state stays if not refreshed, 1..600000. Default per state:
+    listening 15 s, thinking 30 s, speaking 30 s, working 60 s, saved 2.5 s, error 8 s, disconnected 30 s.
+    Idle never expires. After expiry the screen returns to idle (or disconnected if the laptop is silent).
+  - `step`, `steps`: working shows a progress bar and `step/steps`. `steps` 1..99, `step` 0..steps.
+    Without them, working shows a sweeping bar.
+  - Errors: 400 `invalid_json` / `unknown_state` / `bad_request`, 401 `unauthorized`, 413 `too_large` (body over 600 bytes).
+- `POST /heartbeat` (token) -> `{ok: true}`. Tells the device the laptop is alive.
+- `GET /health` (open) -> `{ok, uptime_s, state, fw}`.
+
+Disconnected: the device counts a successful to-do poll, a heartbeat, or a display push as contact.
+No contact for 15 s -> disconnected face. The local timer keeps running and its countdown stays visible.
+At boot the device waits the same 15 s before declaring "disconnected".
+The laptop should send `POST /heartbeat` every 5 s (`nova.device.Heartbeat`).
